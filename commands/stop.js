@@ -1,5 +1,8 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { getVoiceConnection } = require('@discordjs/voice');
+const QueueManager = require('../utils/queueManager');
+
+const queueManager = new QueueManager();
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -26,13 +29,16 @@ module.exports = {
         }
 
         try {
+            // Limpiar la cola
+            queueManager.clearQueue(interaction.guild.id);
+            
             // Stop the connection
             connection.destroy();
 
             const embed = new EmbedBuilder()
                 .setColor('#ff0000')
                 .setTitle('⏹️ Music Stopped')
-                .setDescription('Stopped playing music and left the voice channel.')
+                .setDescription('Stopped playing music, cleared queue, and left the voice channel.')
                 .addFields(
                     { name: 'Channel', value: voiceChannel.name, inline: true },
                     { name: 'Stopped by', value: interaction.user.username, inline: true }

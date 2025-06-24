@@ -1,5 +1,8 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { getVoiceConnection } = require('@discordjs/voice');
+const QueueManager = require('../utils/queueManager');
+
+const queueManager = new QueueManager();
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -35,16 +38,18 @@ module.exports = {
                 });
             }
 
-            // Stop the current audio (this will trigger the 'idle' event)
+            const currentSong = queueManager.getCurrentSong(interaction.guild.id);
+            
+            // Stop the current audio (this will trigger the 'idle' event and play next song)
             player.stop();
 
             const embed = new EmbedBuilder()
                 .setColor('#ffa500')
                 .setTitle('⏭️ Song Skipped')
-                .setDescription('Skipped the current song.')
+                .setDescription(`Skipped: **${currentSong ? currentSong.title : 'Current song'}**`)
                 .addFields(
-                    { name: 'Channel', value: voiceChannel.name, inline: true },
-                    { name: 'Skipped by', value: interaction.user.username, inline: true }
+                    { name: 'Skipped by', value: interaction.user.username, inline: true },
+                    { name: 'Queue size', value: `${queueManager.getQueueSize(interaction.guild.id)} songs`, inline: true }
                 )
                 .setTimestamp();
 
